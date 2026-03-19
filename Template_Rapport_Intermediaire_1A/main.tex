@@ -1,0 +1,165 @@
+% main.tex
+% !TEX program = pdflatex
+\documentclass[12pt,a4paper]{article}
+
+% ---------- Language & typography ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
+% ---------- Layout ----------
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip} % nicer paragraphs (no indent)
+
+% ---------- Graphics & links ----------
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Bibliography ----------
+\usepackage[numbers]{natbib}
+
+
+\begin{document}
+
+% =======================
+% Cover page (title page)
+% =======================
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+
+  % --- Logos row (left/right) ---
+  \noindent
+  \begin{minipage}[t]{0.49\textwidth}
+    \includegraphics[height=2cm]{Logo-ENPC-IP-RVB.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+    \raggedleft
+    \includegraphics[height=2cm]{cermics.jpeg}
+  \end{minipage}
+
+  %\vspace{1.2cm}
+
+  {\Large \textsc{École Nationale des Ponts et Chaussées}\par}
+  \vspace{1.0cm}
+
+  {\large \textbf{PROJET DE PREMIÈRE ANNÉE 2026}\par}
+  {\large \textbf{RAPPORT INTERMÉDIAIRE}\par}
+  \vspace{1.5cm}
+
+  {\LARGE \textbf{Réduction de modèle : Proper Orthogonal Decomposition (POD)
+et méthode des bases réduites}\par}
+  \vspace{1.6cm}
+
+  {\large \textbf{Yasmine EL HOUARI, Antonin AYE, Mathis BORIE, Marek PIOT}\par}
+  \vspace{1.2cm}
+
+  {\large sous la direction de\par}
+  \vspace{0.4cm}
+
+  {\large \textbf{Sofiane EZZEHI}\par}
+  {\large CERMICS\par}
+
+  \vfill
+
+
+\end{titlepage}
+
+% =======================
+% Main content
+% =======================
+\section{Problématique générale}
+
+\subsection{Les fluides et les écoulements de Darcy}
+
+En physique, un fluide sous pression traversant un milieu poreux cherche toujours 
+à minimiser son énergie. Tout comme une bille dévale une pente pour atteindre le 
+point le plus bas, l'eau va naturellement s'écouler en empruntant le chemin de moindre 
+résistance pour dissiper le moins d'énergie possible.
+
+L'eau se déplace à cause d'une différence de pression, notée $u$. Cependant, le fluide 
+ne s'écoule pas dans le vide : il frotte contre les parois du milieu. La vitesse d'écoulement 
+du fluide, notée $\mathbf{v}$, est dictée par la loi empirique de Darcy : 
+$\mathbf{v} = -D \nabla u$. Où $D$ est un coéficient empirique résultant du fluide est du milieu.
+
+L'énergie volumique dissipée localement par ce frottement correspond au travail de cette 
+vitesse contre le gradient de pression, valant ainsi $\frac{1}{2} D \nabla u \cdot \nabla u$. 
+En opposition à cette perte d'énergie, on peut considérer le travail fourni au système 
+par une source externe de fluide (comme un puits d'injection ou de pompage), modélisée 
+par un terme $f$.
+
+Le principe de minimisation de l'énergie revient alors à chercher le champ de pression $u$ 
+qui minimise la fonctionnelle $J(u)$ totale sur le domaine étudié $\Omega$ :
+\begin{equation}
+    J(u) = \int_{\Omega} \frac{1}{2} D \nabla u \cdot \nabla u \, dx - \int_{\Omega} f u \, dx
+\end{equation}
+L'annulation de la dérivée de cette fonctionnelle (condition d'optimalité) conduit 
+naturellement à la formulation variationnelle du problème. Par une intégration par 
+parties, on retrouve l'équation aux dérivées partielles régissant cet écoulement :
+\begin{equation}
+    -\nabla \cdot (D \nabla u) = f \quad \text{dans } \Omega
+\end{equation}
+
+\subsection{Discrétisation et nécessité d'une réduction de modèle}
+
+Malheureusement nous ne savons généralement pas résoudre analitiquement 
+cette équation différentielle. Nous devons donc recourir à des méthodes d'approximation 
+numérique, telles que la méthode des éléments finis. L'idée est de découper le 
+domaine $\Omega$ en un maillage composé de petits éléments géométriques simples. 
+La fonction continue $u$ est ainsi approchée par un vecteur 
+$\mathbf{u}_h \in \mathbb{R}^N$ contenant les valeurs de $u$ aux différents nœuds du maillage, avec $N$ le nombre de degrés de liberté. L'équation aux dérivées partielles se transforme alors en un système algébrique linéaire de la forme :
+\begin{equation}
+    \mathbf{A} \mathbf{u}_h = \mathbf{F}
+\end{equation}
+où $\mathbf{A}$ est une matrice, dite matrice de rigidité, intégrant les propriétés de l'écoulement et $\mathbf{F}$ est le vecteur représentent le terme source $f$ sur le maillage. 
+
+Une fois ce problème discret posé, il ne reste plus qu'à inverser $\mathbf{A}$ pour 
+récupérer $\mathbf{u}_h$. Cependant, pour capturer correctement la physique de 
+l'écoulement et obtenir une précision satisfaisante, le maillage doit souvent être 
+très fin. Le coût de calcul et l'empreinte mémoire pour inverser une telle matrice 
+deviennent alors très lourds. Et pourtant, dans certaines applications, de tels 
+systèmes doivent être résolus des centaines ou des milliers de fois pour différentes 
+configurations de $D$ (modifiant $\mathbf{A}$) et de $f$ (modifiant $\mathbf{F}$). 
+Pour contourner ce mur computationnel, on exploite le fait que ces nombreuses solutions partagent des structures spatiales communes. La réduction de modèle consiste alors à sélectionner une petite base de solutions $U=(\mathbf{u}_1, ..., \mathbf{u}_r)$ permettant d'interpoler au mieux l'ensemble des états possibles du système. En projetant les équations initiales sur le sous-espace engendré par $U$, on aboutit à un système linéaire de taille $r \ll N$ :
+\begin{equation}
+    \mathbf{A}_r \mathbf{u}_r = \mathbf{F}_r
+\end{equation}
+L'inversion de la matrice $\mathbf{A}_r$ est ainsi considérablement plus rapide que celle de $\mathbf{A}$, et permet de reconstruire rapidement une approximation de la solution globale $\mathbf{u}_h$ à l'aide des éléments de $U$.
+
+\section{État de l’art}
+
+
+
+
+
+\section{Calendrier de travail}
+
+\section{Difficultés rencontrées}
+ 
+  {\large (3--4 pages -- environ 7000 caractères)\par}
+
+
+% One reference
+\cite{daygastel2011}
+
+% Multiple references at once
+\cite{picon1992,press1992,abbott2016}
+
+% Cite inside a sentence
+Shannon introduced the idea \cite{shannon1948}.
+% =======================
+% References
+% =======================
+\bibliographystyle{unsrt}
+\bibliography{references}
+Le principe de moindre action stipule que le champ de pression $u$ physique est celui qui minimise l'énergie totale du système. On définit ainsi la fonctionnelle d'énergie $J(u)$ :
+
+
+
+\end{document}
