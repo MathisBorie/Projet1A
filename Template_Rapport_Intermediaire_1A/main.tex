@@ -86,7 +86,7 @@ résistance pour dissiper le moins d'énergie possible.
 L'eau se déplace à cause d'une différence de pression, notée $u$. Cependant, le fluide 
 ne s'écoule pas dans le vide : il frotte contre les parois du milieu. La vitesse d'écoulement 
 du fluide, notée $\mathbf{v}$, est dictée par la loi empirique de Darcy : 
-$\mathbf{v} = -D \nabla u$. Où $D$ est un coéficient empirique résultant du fluide est du milieu.
+$\mathbf{v} = -D \nabla u$. Où $D$ est un coefficient empirique résultant du fluide et du milieu \cite{cas_test}.
 
 L'énergie volumique dissipée localement par ce frottement correspond au travail de cette 
 vitesse contre le gradient de pression, valant ainsi $\frac{1}{2} D \nabla u \cdot \nabla u$. 
@@ -97,18 +97,18 @@ par un terme $f$.
 Le principe de minimisation de l'énergie revient alors à chercher le champ de pression $u$ 
 qui minimise la fonctionnelle $J(u)$ totale sur le domaine étudié $\Omega$ :
 \begin{equation}
-    J(u) = \int_{\Omega} \frac{1}{2} D \nabla u \cdot \nabla u \, dx - \int_{\Omega} f u \, dx
+    J(u) = \int_{\Omega} \frac{1}{2} D \nabla u \cdot \nabla u \, d\Omega - \int_{\Omega} f u \, d\Omega
 \end{equation}
 L'annulation de la dérivée de cette fonctionnelle (condition d'optimalité) conduit 
 naturellement à la formulation variationnelle du problème. Par une intégration par 
-parties, on retrouve l'équation aux dérivées partielles régissant cet écoulement :
+parties, on retrouve l'équation aux dérivées partielles régissant cet écoulement \cite{cas_test} :
 \begin{equation}
     -\nabla \cdot (D \nabla u) = f \quad \text{dans } \Omega
 \end{equation}
 
 \subsection{Discrétisation et nécessité d'une réduction de modèle}
 
-Malheureusement nous ne savons généralement pas résoudre analitiquement 
+Malheureusement nous ne savons généralement pas résoudre analytiquement 
 cette équation différentielle. Nous devons donc recourir à des méthodes d'approximation 
 numérique, telles que la méthode des éléments finis. L'idée est de découper le 
 domaine $\Omega$ en un maillage composé de petits éléments géométriques simples. 
@@ -117,7 +117,7 @@ $\mathbf{u}_h \in \mathbb{R}^N$ contenant les valeurs de $u$ aux différents nœ
 \begin{equation}
     \mathbf{A} \mathbf{u}_h = \mathbf{F}
 \end{equation}
-où $\mathbf{A}$ est une matrice, dite matrice de rigidité, intégrant les propriétés de l'écoulement et $\mathbf{F}$ est le vecteur représentent le terme source $f$ sur le maillage. 
+où $\mathbf{A}$ est une matrice, dite matrice de rigidité, intégrant les propriétés de l'écoulement et $\mathbf{F}$ est le vecteur représentant le terme source $f$ sur le maillage. 
 
 Une fois ce problème discret posé, il ne reste plus qu'à inverser $\mathbf{A}$ pour 
 récupérer $\mathbf{u}_h$. Cependant, pour capturer correctement la physique de 
@@ -125,40 +125,107 @@ l'écoulement et obtenir une précision satisfaisante, le maillage doit souvent 
 très fin. Le coût de calcul et l'empreinte mémoire pour inverser une telle matrice 
 deviennent alors très lourds. Et pourtant, dans certaines applications, de tels 
 systèmes doivent être résolus des centaines ou des milliers de fois pour différentes 
-configurations de $D$ (modifiant $\mathbf{A}$) et de $f$ (modifiant $\mathbf{F}$). 
-Pour contourner ce mur computationnel, on exploite le fait que ces nombreuses solutions partagent des structures spatiales communes. La réduction de modèle consiste alors à sélectionner une petite base de solutions $U=(\mathbf{u}_1, ..., \mathbf{u}_r)$ permettant d'interpoler au mieux l'ensemble des états possibles du système. En projetant les équations initiales sur le sous-espace engendré par $U$, on aboutit à un système linéaire de taille $r \ll N$ :
+configurations de $D$ (modifiant $\mathbf{A}$) et de $f$ (modifiant $\mathbf{F}$) \cite{notes_reduction}. 
+Pour contourner ce mur computationnel, on exploite le fait que ces nombreuses solutions 
+partagent des structures spatiales communes. La réduction de modèle consiste alors à 
+sélectionner une petite base de solutions $U=(\mathbf{u}_1, ..., \mathbf{u}_r)$ 
+permettant d'interpoler au mieux l'ensemble des états possibles du système. 
+En projetant les équations initiales sur le sous-espace engendré par $U$, 
+on aboutit à un système linéaire de taille $r \ll N$ :
 \begin{equation}
     \mathbf{A}_r \mathbf{u}_r = \mathbf{F}_r
 \end{equation}
-L'inversion de la matrice $\mathbf{A}_r$ est ainsi considérablement plus rapide que celle de $\mathbf{A}$, et permet de reconstruire rapidement une approximation de la solution globale $\mathbf{u}_h$ à l'aide des éléments de $U$.
+L'inversion de la matrice $\mathbf{A}_r$ est ainsi considérablement plus 
+rapide que celle de $\mathbf{A}$, et permet de reconstruire rapidement une 
+approximation de la solution globale $\mathbf{u}_h$ à l'aide des éléments de $U$.
 
-\section{État de l’art}
+\section{État de l'art}
+
+\subsection{Extraction de la base réduite : La méthode POD}
+
+Comme établi précédemment, l'enjeu principal de la réduction de modèle réside dans la détermination de la base spatiale optimale $U$. La méthode la plus éprouvée dans la littérature pour extraire cette base est la Décomposition Orthogonale aux Valeurs Propres (POD - \textit{Proper Orthogonal Decomposition}), souvent associée à l'Analyse en Composantes Principales \cite{cours_pod}.
+
+L'approche repose sur une phase d'apprentissage dite \textit{hors-ligne}. On résout d'abord le système complet de taille $N$ pour un échantillon de paramètres physiques représentatifs. Les solutions obtenues, appelées \textit{snapshots}, sont stockées sous forme de colonnes dans une grande matrice $\mathbf{M}$. La méthode POD consiste alors à appliquer une Décomposition en Valeurs Singulières (SVD) à cette matrice :
+\begin{equation}
+    \mathbf{M} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^T
+\end{equation}
+Le théorème de Eckart-Young garantit que les colonnes de la matrice $\mathbf{U}$ (les modes spatiaux) forment la base orthonormée minimisant l'erreur de projection au sens des moindres carrés. De plus, la matrice diagonale $\mathbf{\Sigma}$ contient les valeurs singulières $\sigma_k$. Ces valeurs sont cruciales : le carré d'une valeur singulière représente "l'énergie", c'est-à-dire la quantité d'information physique capturée par le mode associé. En pratique, cette énergie décroît souvent très rapidement, ce qui permet de ne conserver que les $r$ premières colonnes de $\mathbf{U}$ pour former notre base réduite, tout en garantissant la préservation de la quasi-totalité de l'information du système.
+
+\subsection{Dépendance aux paramètres et limites pour les milieux fracturés}
 
 
+Une fois la base POD extraite, la détermination des coefficients de la solution réduite repose sur une projection de Galerkin. Pour bien comprendre la mécanique de cette projection, il est indispensable de revenir au fondement mathématique de notre discrétisation. 
 
+Le théorème de Lax-Milgram garantit que résoudre l'équation aux dérivées partielles initiale (la formulation forte) est strictement équivalent à chercher le champ de pression $u$ dans un espace de Sobolev approprié (typiquement $H^1_0(\Omega)$) vérifiant l'égalité suivante pour toute fonction test $v$ appartenant à ce même espace :
+\begin{equation}
+    a(u, v; \mu) = l(v)
+\end{equation}
+où $l(v) = \int_{\Omega} f v \, d\Omega$ est l'action du terme source, et $a(\cdot, \cdot; \mu)$ est la forme bilinéaire continue et coercive associée à l'opérateur de Darcy, définie par l'intégrale :
+\begin{equation}
+    a(u, v; \mu) = \int_{\Omega} D_\mu(x,y) \nabla u \cdot \nabla v \, d\Omega
+\end{equation}
 
+Travailler dans cet espace variationnel est fondamentalement plus intéressant car il abaisse les exigences de régularité sur la solution (les dérivées secondes n'ont plus besoin d'exister au sens classique) et permet d'encoder naturellement la physique de l'énergie dissipée. Surtout, c'est cette forme bilinéaire qui sert de brique de construction pour nos systèmes : en l'évaluant à l'échelle des petits éléments du maillage fin, on assemble la grande matrice de rigidité $\mathbf{A}(\mu)$. De manière analogue, en l'évaluant directement sur les vecteurs de notre base POD, on génère la petite matrice réduite $\mathbf{A}_r(\mu)$.
+
+Toute l'efficacité de la résolution réduite en-ligne repose alors sur une propriété algébrique cruciale : la dépendance \textit{affine}. Cela signifie que la forme bilinéaire paramétrée peut s'écrire comme une somme de termes où l'influence des paramètres $\mu$ est totalement isolée des variables spatiales :
+\begin{equation}
+    a(u, v; \mu) = \sum_{q=1}^Q \Theta_q(\mu) a_q(u, v)
+\end{equation}
+alors la matrice réduite s'écrit $\mathbf{A}_r(\mu) = \sum_{q=1}^Q \Theta_q(\mu) \mathbf{A}_{r,q}$. Les sous-matrices $\mathbf{A}_{r,q}$ peuvent ainsi être pré-calculées une unique fois hors-ligne. L'assemblage du système réduit pour un nouveau $\mu$ devient une simple addition pondérée de petites matrices de taille $r \times r$, rendant la résolution extrêmement rapide.
+
+Cependant, dans le cadre de nos travaux, nous étudions l'écoulement au sein d'un domaine comportant une fracture \cite{ezzehi2025}. Le paramètre $\mu$ contrôle ici des variables géométriques telles que la position, la largeur ou l'inclinaison de cette fracture. Cette perturbation géométrique s'imbrique directement dans les coordonnées spatiales du profil de diffusion $D_\mu(x,y)$, ce qui rend la séparation des variables impossible : l'opérateur est fortement \textit{non-affine}. 
+
+Dans cette configuration, projeter la matrice nécessite d'évaluer l'intégrale sur l'intégralité du maillage fin pour chaque nouvelle configuration de la fracture, ce qui annule complètement le gain de temps de la réduction de dimension. Pour contourner ce verrou mathématique, Barrault \textit{et al.} (2004) ont introduit la méthode d'Interpolation Empirique (EIM) \cite{barrault2004}, qui permet de reconstruire une approximation affine de ces opérateurs récalcitrants, rétablissant ainsi l'efficacité de la phase de résolution.
 
 \section{Calendrier de travail}
 
+Nous avons déjà étudié le problème en 1D, puis en 2D dans le cas affine, ce qui nous a permis de mieux comprendre le cadre du problème, de mettre en place les premières simulations et d’obtenir une première réduction de modèle. La suite du projet porte maintenant sur les cas non affines, plus complexes, qui nécessitent l’utilisation de la méthode EIM.
+
+\begin{itemize}
+    \item Traitement des deux cas non affines: \\
+    Il reste à mettre en place les deux cas non affines du problème et à identifier l’effet des différents paramètres sur la solution.
+
+    \item Génération et étude des snapshots: \\
+    Nous devrons produire les snapshots associés à ces cas non affines, puis analyser leur comportement afin de préparer la réduction de modèle.
+
+    \item Implémentation de l’EIM: \\
+    Cette étape consistera à utiliser l’EIM pour approximer les termes non affines et rendre le problème exploitable dans un cadre de réduction de modèle.
+
+    \item Couplage avec la POD et analyse des résultats: \\
+    Enfin, il faudra combiner l’EIM avec la POD, puis comparer les résultats obtenus en termes de précision, d’erreur et de gain en temps de calcul.
+\end{itemize}
 \section{Difficultés rencontrées}
+
+\begin{itemize}
+    \item Une première difficulté tient au cadre théorique du projet. En effet, certaines preuves et justifications mathématiques reposent sur des notions d'équations aux dérivées partielles et d'approche variationnelle enseignées au semestre S2B, que nous n'avons pas encore étudiées. Nous avons donc dû nous appuyer sur des résultats admis dans les documents du projet, sans toujours disposer de tout le recul théorique nécessaire.
+
+    \item Une autre difficulté concerne l'implémentation numérique des méthodes de réduction. Elle demande de trouver un compromis entre la précision des résultats, le nombre de snapshots générés, le nombre de modes conservés et le gain réel en temps de calcul, ce qui rend les choix méthodologiques plus délicats.
+\end{itemize}
+
  
-  {\large (3--4 pages -- environ 7000 caractères)\par}
+\begin{thebibliography}{9}
 
+\bibitem{cas_test}
+S. Ezzehi.
+\emph{Some brief notes on the 2D Darcy flow problem with a single fracture}.
+CERMICS, École des Ponts ParisTech, 2026.
 
-% One reference
-\cite{daygastel2011}
+\bibitem{notes_reduction}
+CERMICS.
+\emph{Notes de cours : Réduction de modèle et décomposition orthogonale aux valeurs propres (POD)}.
+École des Ponts ParisTech, 2025.
 
-% Multiple references at once
-\cite{picon1992,press1992,abbott2016}
+\bibitem{barrault2004}
+M. Barrault, Y. Maday, N. C. Nguyen, et A. T. Patera.
+An 'empirical interpolation' method: application to efficient reduced-basis discretization of partial differential equations.
+\emph{Comptes Rendus Mathématique}, 339(9):667--672, 2004.
 
-% Cite inside a sentence
-Shannon introduced the idea \cite{shannon1948}.
-% =======================
-% References
-% =======================
-\bibliographystyle{unsrt}
-\bibliography{references}
-Le principe de moindre action stipule que le champ de pression $u$ physique est celui qui minimise l'énergie totale du système. On définit ainsi la fonctionnelle d'énergie $J(u)$ :
+\bibitem{ezzehi2025}
+S. Ezzehi.
+\emph{Une première série de tests sur la réduction de modèles par POD et NN-augmented POD}.
+Réunion du 24 Juin 2025, École des Ponts ParisTech.
+
+\end{thebibliography}
 
 
 
