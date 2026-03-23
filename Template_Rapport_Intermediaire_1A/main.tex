@@ -97,9 +97,8 @@ par un terme $f$.
 Le principe de minimisation de l'énergie revient alors à chercher le champ de pression $u$ 
 qui minimise la fonctionnelle $J(u)$ totale sur le domaine étudié $\Omega$ :
 \begin{equation*}
-    J(u) = \int_{\Omega} \frac{1}{2} D \nabla u \cdot \nabla u \, d\Omega - \int_{\Omega} f u \, d\Omega
+    J(u) = \int_{\Omega} \frac{1}{2} D \nabla u \cdot \nabla u \, d\Omega - \int_{\Omega} f u \, d\Omega,
 \end{equation*}
-
 La condition du premier ordre pour minimiser cette énergie impose que sa dérivée s'annule. En appliquant une intégration par parties à cette condition, le problème se sépare mathématiquement en deux composantes. Pour que l'équilibre soit garanti, le fluide doit vérifier une équation différentielle locale à l'intérieur du domaine $\Omega$, et simultanément respecter les contraintes imposées sur les bords $\partial \Omega$ (par exemple, une pression imposée $\bar{u}$, appelée condition de Dirichlet). On obtient ainsi le système complet \cite{darcy_wiki} :
 \begin{equation}
   \label{probleme Darcy}
@@ -118,7 +117,7 @@ domaine $\Omega$ en un maillage composé de petits éléments géométriques sim
 La solution $u$ est ainsi approchée par un vecteur 
 $\mathbf{u}^N \in \mathbb{R}^N$ contenant une valeur approchée de $u$ aux différents nœuds du maillage, avec $N$ le nombre de degrés de liberté. L'équation aux dérivées partielles \eqref{probleme Darcy} se discrétise en un système algébrique linéaire de la forme :
 \begin{equation*}
-  \mathbf{A} \mathbf{u}^N = \mathbf{F}
+  \mathbf{A} \mathbf{u}^N = \mathbf{F},
 \end{equation*}
 où $\mathbf{A}$ est une matrice, dite matrice de rigidité, intégrant les propriétés de l'écoulement et $\mathbf{F}$ est le vecteur représentant le terme source $f$ sur le maillage. 
 
@@ -127,26 +126,23 @@ l'écoulement et obtenir une précision satisfaisante, le maillage doit être su
 devenir importants. Pourtant, dans certaines applications 
 comme dans le problème de Darcy, le problème dépend des paramètres du milieu. On cherche alors à résoudre le problème :
 \begin{equation*}
-  \mathbf{A}_\mu \mathbf{u}^N_\mu = \mathbf{F}_\mu
+  \mathbf{A}_\mu \mathbf{u}^N_\mu = \mathbf{F}_\mu,
 \end{equation*}
 
-Où le vecteur $\mu$ représente les paramètres. On demande alors de construire les matrices $\mathbf{A}_\mu$
+où le vecteur $\mu$ représente les paramètres. On demande alors de construire les matrices $\mathbf{A}_\mu$
 et $\mathbf{F}_\mu$ et de résoudre le système qui en résulte autant de fois qu'il y a 
 de valeurs de $\mu$. Le temps de calcul nécessaire devient alors déraisonnable pour des applications
-qui nécessitent de résoudre le problème pour des milliers de paramètres différents.
+qui nécessitent de résoudre le problème pour un grand nombre de paramètres différents.
 
 Pour contourner ce mur computationnel, on exploite le fait que ces nombreuses solutions 
-partagent des structures spatiales communes. La réduction de modèle consiste alors à 
-sélectionner une petite base de solutions $U=(\mathbf{u}_1, ..., \mathbf{u}_r)$ 
+partagent des structures spatiales communes. La réduction de modèle consiste alors à construire une base de petite dimension $U=(\mathbf{u}_1, ..., \mathbf{u}_r)$ 
 permettant d'interpoler au mieux l'ensemble des états possibles du système. 
 En projetant les équations initiales sur le sous-espace engendré par $U$, 
 on aboutit à un système linéaire de taille $r \ll N$ :
 \begin{equation*}
-    \mathbf{A}_r \mathbf{u}_r = \mathbf{F}_r
+    \mathbf{A}_r \mathbf{u}_r = \mathbf{F}_r.
 \end{equation*}
-La résolution de ce système est ainsi considérablement plus 
-rapide que celle de $\mathbf{A}$, et permet de reconstruire rapidement une 
-approximation de la solution globale $\mathbf{u}^N$ à l'aide des éléments de $U$.
+La résolution de ce système réduit est ainsi considérablement plus rapide, et permet de reconstruire rapidement une approximation de la solution globale $\mathbf{u}^N$ à l'aide des éléments de $U$.
 
 \section{État de l'art}
 
@@ -160,8 +156,8 @@ L'approche repose sur une phase d'apprentissage dite \textit{offline}. On résou
 \end{equation*}
 Le théorème de Eckart-Young garantit que les colonnes de la matrice $\mathbf{U}$ 
 (les modes spatiaux) forment la base orthonormée minimisant l'erreur de 
-projection au sens des moindres carrés. De plus, la matrice diagonale 
-$\mathbf{\Sigma}$ contient les valeurs singulières $\sigma_k$ ordonnées de manière décroissante. Ces valeurs sont cruciales : le carré d'une valeur singulière représente la quantité d'information physique capturée par 
+projection au sens des moindres carrés. La matrice diagonale 
+$\mathbf{\Sigma}$ contient les valeurs singulières $\sigma_k$ ordonnées de manière décroissante. Ces valeurs sont cruciales : chaque valeur singulière représente la quantité d'information physique capturée par 
 le mode associé. Dans les cas où les valeurs singulières décroissent assez rapidement, il est alors possible de ne conserver que les $r$ premières colonnes de $\mathbf{U}$ pour former notre base réduite, tout en garantissant une précision raisonnable.
 
 \subsection{Dépendance aux paramètres et limites pour les milieux fracturés}
@@ -180,13 +176,13 @@ où $l(v) = \int_{\Omega} f v \, d\Omega$ est l'action du terme source, et $a_\m
 Sous ces hypothèses le théorème de Lax-Milgram assure que ce problème admet une unique solution. Travailler dans cet espace variationnel est intéressant car il abaisse les exigences de régularité sur la solution (les dérivées secondes n'ont plus besoin d'exister au sens classique) et permet d'encoder naturellement la physique de l'énergie dissipée. De plus, c'est cette forme bilinéaire qui sert de brique de construction pour nos systèmes : en l'évaluant à l'échelle des petits éléments du maillage fin, on assemble la grande matrice de rigidité $\mathbf{A}_\mu$. De manière analogue, en l'évaluant directement sur les vecteurs de notre base POD, on génère la petite matrice réduite $\mathbf{A}^r_\mu$.
 
 Cependant dans certaines applications, la nature du problème paramétrique considéré fait que des opérations en phase \textit{online} font intervenir la dimension haute fidélité $N$. Dans ce cas, des méthodes d'hyper-réduction aident à pallier ces coûts et aboutissent à un problème hyper-réduit indépendant de $N$.
-En effet, dans le cas où la forme bilinéaire $a_\mu$ ne dépend pas affinement des paramètres du problème, on a cette dépendance à la dimension haute fidélité $N$. Cela signifie que la forme bilinéaire paramétrée peut s'écrire comme une somme de termes où l'influence des paramètres $\mu$ est totalement isolée des variables spatiales :
+En effet, dans le cas où la forme bilinéaire $a_\mu$ ne dépend pas affinement des paramètres du problème, on a cette dépendance à la dimension haute fidélité $N$. Plus précisément on dit que la forme bilinéaire paramétrée $a_\mu$ dépend affinement des paramètres si elle peut s'écrire comme :
 \begin{equation*}
-    a_\mu(u, v) = \sum_{q=1}^Q \Theta_q(\mu) a_q(u, v)
+    a_\mu(u, v) = \sum_{q=1}^Q \Theta_q(\mu) a_q(u, v),
 \end{equation*}
-alors la matrice réduite s'écrit $\mathbf{A}^r_\mu = \sum_{q=1}^Q \Theta_q(\mu) \mathbf{A}_{r,q}$. Les sous-matrices $\mathbf{A}_{r,q}$ peuvent ainsi être pré-calculées une unique fois hors-ligne. L'assemblage du système réduit pour un nouveau $\mu$ devient une simple addition pondérée de petites matrices de taille $r \times r$, rendant la résolution extrêmement rapide.
+et la matrice réduite s'écrit alors comme $\mathbf{A}^r_\mu = \sum_{q=1}^Q \Theta_q(\mu) \mathbf{A}_{r,q}$. Les sous-matrices $\mathbf{A}_{r,q}$ peuvent ainsi être pré-calculées une unique fois hors-ligne. L'assemblage du système réduit pour un nouveau $\mu$ devient une simple addition pondérée de petites matrices de taille $r \times r$, rendant la résolution significativement plus rapide.
 
-Cependant, dans le cadre de nos travaux, nous étudions l'écoulement au sein d'un domaine comportant une fracture, inspiré du cas test 5.1 présenté dans \cite{arxiv_fracture}. Le paramètre $\mu$ contrôle ici des variables géométriques telles que la position, la largeur ou l'inclinaison de cette fracture. Cette perturbation géométrique s'imbrique directement dans les coordonnées spatiales du profil de diffusion $D_\mu(x,y)$, ce qui rend la séparation des variables impossible : l'opérateur est \textit{non-affine}. Dans cette configuration, projeter la matrice nécessite d'évaluer l'intégrale sur l'intégralité du maillage fin pour chaque nouvelle configuration de la fracture, ce qui peut significativement réduire le gain de temps de la réduction de dimension. Pour contourner cette limite, Barrault \textit{et al.} (2004) ont introduit la méthode d'Interpolation Empirique (EIM) \cite{barrault2004}, qui permet de reconstruire une approximation affine de ces opérateurs, rétablissant ainsi l'efficacité de la phase \textit{online}.
+Dans le cadre de nos travaux, nous étudions l'écoulement au sein d'un domaine comportant une fracture, inspiré du cas test 5.1 présenté dans \cite{arxiv_fracture}. Le paramètre $\mu$ contrôle ici des variables géométriques telles que la position, la largeur ou l'inclinaison de cette fracture. Cette perturbation géométrique s'imbrique directement dans les coordonnées spatiales du profil de diffusion $D_\mu(x,y)$, ce qui rend la séparation des variables impossible : l'opérateur est \textit{non-affine}. Dans cette configuration, projeter la matrice nécessite d'évaluer l'intégrale sur l'intégralité du maillage fin pour chaque nouvelle configuration de la fracture, ce qui peut significativement réduire le gain de temps de la réduction de dimension. Pour contourner cette limite, Barrault \textit{et al.} (2004) ont introduit la méthode d'Interpolation Empirique (EIM) \cite{barrault2004}, qui permet de reconstruire une approximation affine de ces opérateurs, rétablissant ainsi l'efficacité de la phase \textit{online}.
 
 \section{Calendrier de travail}
 
@@ -202,8 +198,6 @@ Nous avons déjà étudié le problème en 1D, puis en 2D dans le cas affine, ce
     \item Implémentation de l’EIM: \\
     Cette étape consistera à utiliser l’EIM pour approximer les termes non affines et rendre le problème exploitable dans un cadre de réduction de modèle.
 
-    \item Couplage avec la POD et analyse des résultats: \\
-    Enfin, il faudra combiner l’EIM avec la POD, puis comparer les résultats obtenus en termes de précision, d’erreur et de gain en temps de calcul.
 \end{itemize}
 \section{Difficultés rencontrées}
 
