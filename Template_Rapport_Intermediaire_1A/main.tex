@@ -86,12 +86,10 @@ point le plus bas, un fluide va naturellement s'écouler en empruntant le chemin
 résistance pour dissiper le moins d'énergie possible.
 
 Le fluide se déplace sous l'effet d'un gradient de pression $\nabla u$, où $u$ désigne la pression. 
-Cependant, le fluide ne s'écoule pas dans le vide : il frotte contre les parois du milieu. La vitesse d'écoulement 
-du fluide, notée $\mathbf{v}$, est dictée par la loi empirique de Darcy \cite{darcy_wiki} : 
+Cependant, le fluide ne s'écoule pas dans le vide : il frotte contre les parois du milieu. La vitesse d'écoulement du fluide, notée $\mathbf{v}$, est dictée par la loi empirique de Darcy \cite{darcy_wiki} : 
 $\mathbf{v} = -D \nabla u$, où $D$ est un coefficient empirique qui dépend du fluide et du milieu.
 
-L'énergie volumique dissipée localement par ce frottement correspond au travail de cette 
-vitesse contre le gradient de pression, valant ainsi $\frac{1}{2} D \nabla u \cdot \nabla u$. 
+L'énergie volumique dissipée localement par ce frottement visqueux correspond au travail de cette vitesse contre le gradient de pression, valant ainsi $\frac{1}{2} D \nabla u \cdot \nabla u$. 
 En opposition à cette perte d'énergie, on peut considérer le travail fourni au système 
 par une source externe de fluide (comme un puits d'injection ou de pompage), modélisée 
 par un terme $f$.
